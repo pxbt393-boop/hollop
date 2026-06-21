@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOLLOP — Калькулятор сувенирной продукции</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#1B2A6B;--bg3:#3A3FA0;--bg5:#6440E8;
+  --neon:#5CFF4A;--neon-dim:rgba(92,255,74,.15);--neon-glow:rgba(92,255,74,.3);
+  --red:#FF4A6A;--red-dim:rgba(255,74,106,.15);
+  --surface:rgba(27,42,107,.5);--text:#f0f5ff;--text2:#c8d0e8;--text3:#8890b8;--text4:#586090;
+  --font:'Inter',system-ui,sans-serif;--radius:16px;--radius-sm:10px;--ease2:cubic-bezier(0.22,1,0.36,1);
+}
+body{
+  font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;
+  background:linear-gradient(135deg,var(--bg1),var(--bg3),var(--bg5));color:var(--text);
+}
+#particles-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+#cursor{position:fixed;width:16px;height:16px;border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:difference;transition:width .3s,height .3s,background .3s,transform .15s;transform:translate(-50%,-50%);background:var(--neon);display:none;box-shadow:0 0 20px var(--neon-glow),0 0 60px rgba(92,255,74,.2)}
+#cursor.hovering{width:48px;height:48px;background:var(--neon)}
+@media(hover:hover){#cursor{display:block}}
+.main{z-index:1;position:relative;flex:1}
+.container{max-width:1000px;margin:0 auto;padding:0 20px;width:100%}
+
+.header{padding:24px 0 8px;display:flex;align-items:center;justify-content:space-between;position:relative}
+.header::after{content:'';position:absolute;bottom:0;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,var(--neon-dim),transparent)}
+.logo-text{font-size:28px;font-weight:900;letter-spacing:-1px;color:var(--neon);text-shadow:0 0 20px rgba(92,255,74,.15);line-height:1;position:relative;display:inline-block}
+.logo-text::after{content:'◆';position:absolute;top:-8px;right:-16px;font-size:8px;color:var(--neon);opacity:.4;animation:sparkle 2s ease-in-out infinite}
+@keyframes sparkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.8;transform:scale(1.4)}}
+.logo-sub{font-size:11px;color:var(--text4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+
+.hero{text-align:center;padding:28px 0 24px;animation:fadeDown .6s ease}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.hero h1{font-size:clamp(26px,4vw,42px);font-weight:900;line-height:1.1;margin-bottom:6px;letter-spacing:-1.5px}
+.hero h1 .accent{color:var(--neon);text-shadow:0 0 20px var(--neon-glow);animation:glowPulse 3s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{text-shadow:0 0 20px var(--neon-glow)}50%{text-shadow:0 0 40px var(--neon-glow),0 0 80px rgba(92,255,74,.15)}}
+.hero p{font-size:14px;color:var(--text2)}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:100px;font-size:11px;font-weight:600;background:var(--neon-dim);color:var(--neon);border:1px solid var(--neon-dim);margin-bottom:10px;animation:fadeDown .6s .2s both}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--neon);animation:dotPulse 1.2s ease infinite}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+
+/* SECTIONS */
+.section-block{background:var(--surface);backdrop-filter:blur(12px);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius);padding:20px;margin-bottom:24px;animation:fadeUp .5s both}
+.section-block:nth-child(2){animation-delay:.1s}
+.section-block:nth-child(3){animation-delay:.2s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title .accent{color:var(--neon)}
+.section-title .num{width:26px;height:26px;border-radius:50%;background:var(--neon-dim);color:var(--neon);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-right:4px}
+
+/* PROFIT GRID */
+.profit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.profit-card{background:rgba(92,255,74,.03);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:14px;transition:all .3s;perspective:600px}
+.profit-card:hover{border-color:var(--neon-dim);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.profit-card .p-icon{font-size:24px;margin-bottom:6px;display:block;transition:transform .3s ease}
+.profit-card:hover .p-icon{transform:scale(1.15) rotate(-5deg)}
+.profit-card .p-name{font-size:14px;font-weight:600;margin-bottom:10px}
+.profit-card .p-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:12px}
+.profit-card .p-row label{color:var(--text4);font-weight:500}
+.profit-card .p-row input{width:70px;padding:4px 8px;border-radius:6px;border:1px solid rgba(92,255,74,.08);background:rgba(92,255,74,.03);color:var(--text);font-size:13px;font-weight:600;font-family:var(--font);outline:none;text-align:center;transition:border .3s,box-shadow .3s}
+.profit-card .p-row input:focus{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon),0 0 16px rgba(92,255,74,.1)}
+.profit-card .p-result{font-size:13px;font-weight:700;padding-top:6px;border-top:1px solid rgba(92,255,74,.06);margin-top:6px;display:flex;justify-content:space-between}
+.p-result .val{color:var(--neon)}
+.p-profit{font-size:13px;display:flex;justify-content:space-between;padding-top:4px;transition:all .3s}
+.p-profit .positive{color:var(--neon);font-weight:700}
+.p-profit .negative{color:var(--red);font-weight:700}
+
+/* TOTALS BAR */
+.totals-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(92,255,74,.06);border:1px solid rgba(92,255,74,.1);border-radius:var(--radius-sm);padding:16px 20px;flex-wrap:wrap;gap:8px;position:relative;overflow:hidden}
+.totals-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent);animation:barScan 3s ease-in-out infinite}
+@keyframes barScan{0%,100%{opacity:.3}50%{opacity:1}}
+.totals-bar .tb-item{text-align:center;position:relative;z-index:1}
+.totals-bar .tb-label{font-size:11px;color:var(--text4);text-transform:uppercase;letter-spacing:.5px}
+.totals-bar .tb-val{font-size:20px;font-weight:800;margin-top:2px;transition:all .3s}
+.tb-val.revenue{color:var(--text)}
+.tb-val.cost{color:var(--red)}
+.tb-val.profit{color:var(--neon);text-shadow:0 0 15px var(--neon-glow)}
+.tb-val.profit.positive{animation:profitGlow 1s ease}
+@keyframes profitGlow{0%{transform:scale(1)}50%{transform:scale(1.1);text-shadow:0 0 40px var(--neon-glow)}100%{transform:scale(1)}}
+
+/* SELECTOR */
+.selector-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.sel-card{background:rgba(92,255,74,.03);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:14px;cursor:pointer;transition:all .25s;text-align:center;position:relative;overflow:hidden}
+.sel-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(92,255,74,.04));opacity:0;transition:opacity .3s}
+.sel-card:hover::before{opacity:1}
+.sel-card:hover{border-color:var(--neon-dim);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.sel-card.active{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon),0 0 24px rgba(92,255,74,.12);background:rgba(92,255,74,.06)}
+.sel-card.active::after{content:'✓';position:absolute;top:6px;right:10px;font-size:12px;font-weight:700;color:var(--neon);animation:popIn .3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes popIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+.sel-card .s-icon{font-size:26px;display:block;margin-bottom:4px;position:relative;z-index:1;transition:transform .3s}
+.sel-card:hover .s-icon{transform:scale(1.1)}
+.sel-card .s-name{font-size:13px;font-weight:600;position:relative;z-index:1}
+
+/* CALC */
+.calc-section{display:none}
+.calc-section.active{display:block;animation:fadeIn .35s var(--ease2)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.calc-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.calc-header .c-icon{font-size:24px;animation:gentleBounce 4s ease-in-out infinite}
+@keyframes gentleBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.calc-header .c-title{font-size:15px;font-weight:700}
+
+.qty-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.qty-row label{font-size:12px;color:var(--text4);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.qty-row input{width:90px;padding:6px 10px;border-radius:8px;border:1px solid rgba(92,255,74,.08);background:rgba(92,255,74,.03);color:var(--text);font-size:15px;font-weight:700;font-family:var(--font);outline:none;text-align:center;transition:border .3s,box-shadow .3s}
+.qty-row input:focus{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon),0 0 16px rgba(92,255,74,.08)}
+
+.materials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+.mat-item{background:rgba(92,255,74,.02);border:1px solid rgba(92,255,74,.05);border-radius:8px;padding:12px;transition:all .25s}
+.mat-item:hover{border-color:var(--neon-dim);background:rgba(92,255,74,.04)}
+.mat-item .m-name{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.mat-item .m-name a{color:var(--neon);opacity:.6;text-decoration:none;font-size:10px;margin-left:3px;transition:opacity .2s}
+.mat-item .m-name a:hover{opacity:1}
+.mat-item .m-per{font-size:11px;color:var(--text4);margin-bottom:2px}
+.mat-item .m-price{font-size:11px;color:var(--text4);margin-bottom:4px}
+.mat-item .m-total{font-size:13px;font-weight:700;color:var(--neon);padding-top:4px;border-top:1px solid rgba(92,255,74,.05);animation:fadeIn .3s}
+.no-mats{padding:24px;text-align:center;color:var(--text4);font-size:13px}
+
+.cost-summary{display:flex;justify-content:space-between;align-items:center;background:rgba(92,255,74,.04);border:1px solid rgba(92,255,74,.08);border-radius:8px;padding:12px 16px;margin-top:4px;transition:all .3s}
+.cost-summary .cs-label{font-size:12px;color:var(--text4)}
+.cost-summary .cs-val{font-size:16px;font-weight:700;color:var(--neon);transition:all .3s}
+
+/* TABS */
+.tab-nav{display:flex;gap:8px;margin-bottom:20px;animation:fadeDown .6s .1s both;justify-content:center}
+.tab-btn{padding:8px 22px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .2s;background:rgba(92,255,74,.03);border:1px solid rgba(92,255,74,.06);color:var(--text3)}
+.tab-btn:hover{border-color:var(--neon-dim);color:var(--text);background:var(--neon-dim)}
+.tab-btn.active{background:var(--neon-dim);border-color:var(--neon);color:var(--neon);box-shadow:0 0 0 1px var(--neon)}
+.view{display:none}
+.view.active{display:block;animation:fadeIn .35s var(--ease2)}
+/* MOSCOMSPORT */
+.order-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.order-card{background:rgba(92,255,74,.03);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:16px;transition:all .3s}
+.order-card:hover{border-color:var(--neon-dim);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.order-card .o-icon{font-size:32px;margin-bottom:6px;display:block}
+.order-card .o-name{font-size:15px;font-weight:700;margin-bottom:10px}
+.order-card .o-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px;border-bottom:1px solid rgba(92,255,74,.03)}
+.order-card .o-row:last-child{border-bottom:none}
+.order-card .o-label{color:var(--text4)}
+.order-card .o-val{font-weight:700;color:var(--text)}
+.order-card .o-val.neon{color:var(--neon)}
+.order-card .o-price{font-size:24px;font-weight:900;color:var(--neon);text-shadow:0 0 15px var(--neon-glow);margin-top:8px;text-align:right}
+.totals-card{background:rgba(92,255,74,.04);border:1px solid rgba(92,255,74,.1);border-radius:var(--radius-sm);padding:20px;position:relative;overflow:hidden}
+.totals-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent);animation:barScan 3s ease-in-out infinite}
+.t-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px;border-bottom:1px solid rgba(92,255,74,.04)}
+.t-row:last-child{border-bottom:none}
+.t-label{color:var(--text3)}
+.t-val{font-weight:700;color:var(--text)}
+.t-val.red{color:var(--red)}
+.t-val.neon{color:var(--neon)}
+.t-row.total{border-top:1px solid var(--neon-dim);margin-top:6px;padding-top:14px}
+.t-row.total .t-label{font-size:16px;font-weight:800;color:var(--text)}
+.t-row.total .t-val{font-size:24px;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon-glow)}
+.m-block{margin-bottom:20px}
+.m-block:last-child{margin-bottom:0}
+.m-block-header{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.m-block-header .qty{font-size:12px;font-weight:600;color:var(--text4)}
+.m-block-summary{text-align:right;margin-top:8px;font-size:13px;color:var(--text4)}
+.m-block-summary strong{color:var(--text2)}
+.m-block-summary .total{color:var(--neon)}
+.m-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(92,255,74,.08),transparent);margin:8px 0 16px}
+
+/* END MOSCOMSPORT */
+
+/* FINAL PROFIT */
+#finalProfit{transition:all .3s}
+#finalProfit.pulse{animation:profitPulse .6s ease}
+@keyframes profitPulse{0%{transform:scale(1)}50%{transform:scale(1.08);text-shadow:0 0 40px var(--neon-glow),0 0 80px var(--neon-glow)}100%{transform:scale(1)}}
+#finalProfit.negative{color:var(--red)!important;text-shadow:none!important}
+
+.footer{margin-top:auto;padding:20px 0;text-align:center;border-top:1px solid rgba(92,255,74,.06);font-size:12px;color:var(--text4);position:relative;z-index:2}
+
+/* TIER TABLE */
+#tierBlock{animation:fadeIn .3s ease}
+#tierBlock table{animation:fadeIn .3s ease}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .tab-nav{flex-wrap:wrap}
+  .tab-btn{font-size:12px;padding:6px 14px}
+  .profit-grid,.selector-cards{grid-template-columns:1fr;max-width:380px;margin:0 auto 16px}
+  .totals-bar{flex-direction:column;gap:6px}
+  .materials-grid{grid-template-columns:1fr}
+  .order-grid{grid-template-columns:1fr}
+}</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+<div id="cursor"></div>
+
+<div class="main">
+<div class="container">
+
+  <header class="header">
+    <div>
+      <div class="logo-text">HOLLOP</div>
+      <div class="logo-sub">merch calculator</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-badge"><span class="badge-dot"></span> HOLLOP PRODUCTION</div>
+    <h1>Калькулятор <span class="accent">прибыли</span></h1>
+    <p>Введите количество — цена, себестоимость и прибыль рассчитаются автоматически</p>
+  </section>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" data-view="calculator">📊 Калькулятор</button>
+    <button class="tab-btn" data-view="fonbet" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/320/30</button>
+    <button class="tab-btn" data-view="ms2" style="text-decoration:line-through;opacity:.6">📋 Москомспорт 400/400</button>
+    <button class="tab-btn" data-view="moskomsport">📦 Москомспорт 800/800</button>
+    <button class="tab-btn" data-view="materials">🔗 Материалы</button>
+    <button class="tab-btn" data-view="total">💰 Общая прибыль</button>
+  </div>
+
+  <div id="calculatorView" class="view active">
+
+  <!-- PROFIT -->
+  <div class="section-block">
+    <div class="section-title"><span class="num">1</span> Общая прибыль</div>
+
+    <div style="text-align:right;margin-bottom:12px">
+      <button id="toggleTiers" style="background:none;border:1px solid var(--neon-dim);color:var(--text3);font-size:12px;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:var(--font);transition:all .2s" onmouseover="this.style.borderColor='var(--neon)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='';this.style.color=''">🏷️ Тарифы и скидки</button>
+    </div>
+
+    <div id="tierBlock" style="display:none;margin-bottom:16px;background:rgba(92,255,74,.02);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:14px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
+        <thead><tr>
+          <th style="text-align:left;padding:6px 10px;color:var(--text4);font-weight:600;border-bottom:1px solid rgba(92,255,74,.06)">Продукт</th>
+          <th style="padding:6px 10px;color:var(--text4);font-weight:600;border-bottom:1px solid rgba(92,255,74,.06);text-align:center" colspan="5">Количество / Цена за шт / Скидка</th>
+        </tr></thead>
+        <tbody id="tierTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="profit-grid" id="profitGrid"></div>
+
+    <div class="totals-bar">
+      <div class="tb-item"><div class="tb-label">Выручка</div><div class="tb-val revenue" id="totalRevenue">0 ₽</div></div>
+      <div class="tb-item"><div class="tb-label">Себестоимость</div><div class="tb-val cost" id="totalCost">0 ₽</div></div>
+      <div class="tb-item"><div class="tb-label">Прибыль</div><div class="tb-val profit" id="totalProfit">0 ₽</div></div>
+    </div>
+  </div>
+
+  <!-- COST CALCULATOR -->
+  <div class="section-block">
+    <div class="section-title"><span class="num">2</span> Калькулятор себестоимости</div>
+
+    <div class="selector-cards" id="selectorCards"></div>
+
+    <div class="calc-section" id="calcSection">
+      <div class="calc-header">
+        <span class="c-icon" id="calcIcon">🦀</span>
+        <span class="c-title" id="calcTitle">Грабер</span>
+      </div>
+      <div class="qty-row">
+        <label>Количество:</label>
+        <input type="number" id="qtyInput" min="0" step="1" value="0">
+      </div>
+      <div class="materials-grid" id="materialsGrid"></div>
+      <div class="cost-summary">
+        <span class="cs-label">Стоимость материалов на <span id="qtyShow">0</span> шт:</span>
+        <span class="cs-val" id="matTotalCost">0 ₽</span>
+      </div>
+      <div class="cost-summary" style="margin-top:6px;border-color:rgba(255,74,106,.1);background:rgba(255,74,106,.03)">
+        <span class="cs-label">Налог 10% с выручки:</span>
+        <span class="cs-val" id="taxCost" style="color:var(--red)">0 ₽</span>
+      </div>
+      <div class="cost-summary" style="margin-top:6px;border-color:var(--neon-dim);background:rgba(92,255,74,.06)">
+        <span class="cs-label" style="font-weight:700;color:var(--text)">Итого с налогом:</span>
+        <span class="cs-val" id="totalWithTax" style="font-size:18px">0 ₽</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL PROFIT -->
+  <div class="section-block" style="border-color:var(--neon-dim)">
+    <div class="section-title"><span class="num">3</span> Итоговая прибыль по всем позициям</div>
+    <div class="totals-bar" style="flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span style="font-size:13px;color:var(--text3)">Выручка</span>
+        <span style="font-size:18px;font-weight:700;color:var(--text)" id="finalRevenue">0 ₽</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span style="font-size:13px;color:var(--text3)">Себестоимость материалов</span>
+        <span style="font-size:18px;font-weight:700;color:var(--red)" id="finalCost">0 ₽</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span style="font-size:13px;color:var(--text3)">Налог 10% с выручки</span>
+        <span style="font-size:18px;font-weight:700;color:var(--red)" id="finalTax">0 ₽</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;width:100%;border-top:1px solid rgba(92,255,74,.1);padding-top:8px">
+        <span style="font-size:15px;font-weight:700;color:var(--text)">Всего расходов</span>
+        <span style="font-size:18px;font-weight:700;color:var(--text2)" id="finalExpenses">0 ₽</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;width:100%;border-top:1px solid var(--neon-dim);padding-top:10px">
+        <span style="font-size:20px;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon-glow)">Чистая прибыль</span>
+        <span style="font-size:28px;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon-glow)" id="finalProfit">0 ₽</span>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end calculatorView -->
+
+  <div id="moskomsportView" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ДЕЙСТВУЮЩАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="msOrderGrid"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Себестоимость материалов</div>
+      <div id="msMaterialsBlock"></div>
+    </div>
+
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="msTotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="ms2View" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="ms2OrderGrid"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
+      <div id="ms2CostsBlock"></div>
+    </div>
+
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="ms2TotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="fonbetView" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="fbOrderGrid"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
+      <div id="fbCostsBlock"></div>
+    </div>
+
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="fbTotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="materialsView" class="view">
+    <div class="section-block" id="materialsViewContent">
+      <div class="section-title"><span class="num">📋</span> Все материалы и ссылки на поставщиков</div>
+      <div id="materialsList"></div>
+    </div>
+  </div>
+
+  <div id="totalView" class="view">
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">💰</span> Сводка по всем поставкам</div>
+      <div id="totalSummary"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<footer class="footer">HOLLOP © 2026 — Сделано с любовью от Анастасии Бородиной</footer>
+
+<script>
+const products = [
+  {
+    id: 'grabber', name: 'Грабер', icon: '🍓',
+    tiers: [{qty:100,price:270},{qty:200,price:265},{qty:300,price:255},{qty:500,price:240},{qty:1000,price:215}],
+    materials: [
+      { name: 'Велкро 30мм', per: 0.1, unit: 'м', price: 36.57, link: 'https://protos.ru/catalog/item/kontaktnaya-lenta-chernyi-30mm-20201' },
+      { name: 'Двухсторонний скотч 3M', per: 0.18, unit: 'м', price: 41.4, link: 'https://www.ozon.ru/product/dvuhstoronniy-skotch-30-mm-5-metrov-3m-1654505105/' },
+      { name: 'Пакет zip-lock', per: 1, unit: 'шт', price: 6.92, source: '346 ₽ / 50шт', link: 'https://www.ozon.ru/product/zip-lock-paket-s-zastezhkoy-i-okoshkom-50-sht-10-5-15-sm-belye-932676708/' },
+      { name: 'Спиртовая салфетка', per: 1, unit: 'шт', price: 1.53, link: 'https://www.wildberries.ru/catalog/548915449/detail.aspx?size=755635154' },
+    ]
+  },
+  {
+    id: 'racket-holder', name: 'Держатель ракетки', icon: '🎾',
+    tiers: [{qty:100,price:650},{qty:200,price:630},{qty:300,price:590},{qty:500,price:550},{qty:1000,price:490}],
+    materials: [
+      { name: 'Клейкий стик', per: 1, unit: 'шт', price: 2.82, link: 'https://www.wildberries.ru/catalog/1108100041/detail.aspx?size=1639769415' },
+    ]
+  },
+  {
+    id: 'phone-holder', name: 'Держатель для телефона', icon: '📱',
+    tiers: [{qty:100,price:1800},{qty:200,price:1760},{qty:300,price:1730},{qty:500,price:1650},{qty:1000,price:1550}],
+    materials: []
+  }
+];
+
+// ===== PARTICLES =====
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let pts = []; let mX = -1e4, mY = -1e4;
+function resizeP(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resizeP(); window.addEventListener('resize', resizeP);
+document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY });
+class Dot {
+  constructor(){this.reset();this.c=['92,255,74','98,245,66','120,255,100'][Math.floor(Math.random()*3)]}
+  reset(){this.x=Math.random()*canvas.width;this.y=Math.random()*canvas.height;this.s=Math.random()*2+.3;this.sx=(Math.random()-.5)*.25;this.sy=(Math.random()-.5)*.25;this.a=Math.random()*.4+.05;this.p=Math.random()*6.28}
+  update(){this.x+=this.sx;this.y+=this.sy;this.p+=.01;this.ca=this.a*(.6+.4*Math.sin(this.p));if(this.x<0||this.x>canvas.width)this.sx*=-1;if(this.y<0||this.y>canvas.height)this.sy*=-1;const dx=this.x-mX,dy=this.y-mY,d=Math.sqrt(dx*dx+dy*dy);if(d<100){const f=(100-d)/100;this.x+=dx*f*.012;this.y+=dy*f*.012}}
+  draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,6.28);ctx.fillStyle=`rgba(${this.c},${this.ca})`;ctx.fill()}
+}
+for(let i=0;i<60;i++)pts.push(new Dot());
+function drawLines(){for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(92,255,74,${.03*(1-d/120)})`;ctx.lineWidth=.5;ctx.stroke()}}}
+function animP(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{p.update();p.draw()});drawLines();requestAnimationFrame(animP)}
+animP();
+
+// ===== CURSOR =====
+const cursor = document.getElementById('cursor');
+if (window.matchMedia('(hover: hover)').matches) {
+  document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px' });
+  document.querySelectorAll('button, .profit-card, .sel-card, .qty-row input').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+  });
+}
+
+// ===== CONFETTI =====
+function burstConfetti(x, y) {
+  const colors = ['#5CFF4A','#62F542','#7CFF6A','#48FF3A','#90FF80'];
+  for(let i=0;i<40;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText=`position:fixed;pointer-events:none;z-index:9998;left:${x+(Math.random()-.5)*60}px;top:${y+(Math.random()-.5)*60}px;background:${colors[Math.floor(Math.random()*colors.length)]};width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;border-radius:${Math.random()>.5?'50%':'2px'};animation:confettiFall${(1.2+Math.random()*.8)+'s'} ease-out forwards`;
+    const style=document.createElement('style');
+    const name=`cf${Math.random().toString(36).slice(2)}`;
+    style.textContent=`@keyframes ${name}{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(${400+Math.random()*500}px) rotate(${Math.random()*1080-540}deg) scale(.3)}}`;
+    document.head.appendChild(style);
+    el.style.animationName=name;
+    document.body.appendChild(el);
+    setTimeout(()=>{el.remove();style.remove()},2500);
+  }
+}
+
+// ===== HELPERS =====
+function getTier(tiers, qty) {
+  let best = tiers[tiers.length - 1];
+  for (const t of tiers) { if (qty >= t.qty) best = t }
+  return best;
+}
+function matCostPerUnit(p) {
+  if (!p.materials) return 0;
+  return p.materials.reduce((sum, m) => sum + m.per * m.price, 0);
+}
+const fmt = n => n % 1 === 0 ? n.toLocaleString() : n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+// ===== PROFIT GRID =====
+const profitGrid = document.getElementById('profitGrid');
+products.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'profit-card';
+  card.dataset.id = p.id;
+  card.innerHTML = `
+    <span class="p-icon">${p.icon}</span>
+    <div class="p-name">${p.name}</div>
+    <div class="p-row"><label>Кол-во</label><input type="number" class="pqty" data-id="${p.id}" min="0" value="0"></div>
+    <div class="p-row"><label>Цена за шт</label><span style="font-size:13px;font-weight:700;color:var(--neon)" id="ppu-${p.id}">0 ₽</span></div>
+    <div class="p-row"><label>Тариф</label><span style="font-size:11px;color:var(--text3)" id="tier-${p.id}">—</span></div>
+    <div class="p-result"><span>Выручка</span><span class="val" id="rev-${p.id}">0 ₽</span></div>
+    <div class="p-profit" id="prof-${p.id}"><span>Прибыль</span><span>0 ₽</span></div>
+  `;
+  profitGrid.appendChild(card);
+  card.querySelector('.pqty').addEventListener('input', () => {
+    calcProfit();
+    const qty = parseInt(card.querySelector('.pqty').value) || 0;
+    if (currentProduct && currentProduct.id === p.id) {
+      document.getElementById('qtyInput').value = qty;
+      calcCost();
+    }
+  });
+});
+
+// ===== SELECTOR =====
+const selContainer = document.getElementById('selectorCards');
+products.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'sel-card';
+  card.dataset.id = p.id;
+  card.innerHTML = `<span class="s-icon">${p.icon}</span><div class="s-name">${p.name}</div>`;
+  card.addEventListener('click', () => selectProduct(p.id));
+  selContainer.appendChild(card);
+});
+
+let currentProduct = null;
+
+function selectProduct(id) {
+  document.querySelectorAll('.sel-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.sel-card[data-id="${id}"]`).classList.add('active');
+  currentProduct = products.find(p => p.id === id);
+  document.getElementById('calcSection').classList.add('active');
+  document.getElementById('calcIcon').textContent = currentProduct.icon;
+  document.getElementById('calcTitle').textContent = currentProduct.name;
+  const profitQty = parseInt(document.querySelector(`.pqty[data-id="${id}"]`).value) || 0;
+  document.getElementById('qtyInput').value = profitQty;
+  renderMaterials();
+  calcCost();
+}
+
+// ===== MATERIALS =====
+function renderMaterials() {
+  const grid = document.getElementById('materialsGrid');
+  grid.innerHTML = '';
+  if (!currentProduct || !currentProduct.materials || !currentProduct.materials.length) {
+    grid.innerHTML = '<div class="no-mats">Нет дополнительных материалов</div>';
+    return;
+  }
+  currentProduct.materials.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'mat-item';
+    const perStr = m.unit === 'м' ? m.per.toFixed(2) : m.per;
+    const safeId = 'm-' + currentProduct.id + '-' + m.name.replace(/\s/g,'');
+    item.innerHTML = `
+      <div class="m-name">${m.name} <a href="${m.link}" target="_blank">↗</a></div>
+      <div class="m-per">На 1 шт: ${perStr} ${m.unit}</div>
+      <div class="m-price">${m.source || `${m.price.toFixed(2)} ₽/${m.unit}`}</div>
+      <div class="m-total" id="${safeId}"></div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+// ===== CALC COST =====
+function calcCost() {
+  const qty = parseInt(document.getElementById('qtyInput').value) || 0;
+  document.getElementById('qtyShow').textContent = qty;
+  if (!currentProduct || !currentProduct.materials) {
+    document.getElementById('matTotalCost').textContent = '0 ₽';
+    document.getElementById('taxCost').textContent = '0 ₽';
+    document.getElementById('totalWithTax').textContent = '0 ₽';
+    return;
+  }
+  let total = 0;
+  currentProduct.materials.forEach(m => {
+    const cost = m.per * m.price * qty;
+    total += cost;
+    const safeId = 'm-' + currentProduct.id + '-' + m.name.replace(/\s/g,'');
+    const el = document.getElementById(safeId);
+    if (el) {
+      const totQ = m.per * qty;
+      if (qty > 0) {
+        if (m.unit === 'м') {
+          el.textContent = totQ >= 1 ? `На ${qty} шт: ${totQ.toFixed(2)} м` : `На ${qty} шт: ${(totQ*100).toFixed(0)} см`;
+        } else {
+          el.textContent = `На ${qty} шт: ${Math.round(totQ)} ${m.unit}`;
+        }
+      } else { el.textContent = ''; }
+    }
+  });
+  const tier = getTier(currentProduct.tiers, qty);
+  const revenue = qty * (qty > 0 ? tier.price : 0);
+  const tax = revenue * 0.1;
+  const totalWith = total + tax;
+  animateVal('matTotalCost', total);
+  animateVal('taxCost', tax);
+  animateVal('totalWithTax', totalWith);
+}
+
+function animateVal(id, val) {
+  const el = document.getElementById(id);
+  const prev = parseFloat(el.dataset.prev) || 0;
+  el.dataset.prev = val;
+  el.textContent = fmt(val) + ' ₽';
+  if (val !== prev && val > 0) {
+    el.style.transform = 'scale(1.05)';
+    setTimeout(() => el.style.transform = '', 200);
+  }
+}
+
+document.getElementById('qtyInput').addEventListener('input', calcCost);
+
+// ===== CALC PROFIT =====
+function calcProfit() {
+  let totalRevenue = 0, totalCost = 0;
+  let prevProfit = parseFloat(document.getElementById('totalProfit').dataset.prev) || 0;
+
+  products.forEach(p => {
+    const qty = parseInt(document.querySelector(`.pqty[data-id="${p.id}"]`).value) || 0;
+    const tier = getTier(p.tiers, qty);
+    const sellPrice = qty > 0 ? tier.price : 0;
+    const revenue = qty * sellPrice;
+    const cost = qty * matCostPerUnit(p);
+    const profit = revenue - cost;
+
+    totalRevenue += revenue;
+    totalCost += cost;
+
+    document.getElementById(`ppu-${p.id}`).textContent = qty > 0 ? `${sellPrice} ₽` : '0 ₽';
+    document.getElementById(`tier-${p.id}`).textContent = qty > 0 ? `${tier.qty.toLocaleString()}+ шт` : '—';
+    document.getElementById(`rev-${p.id}`).textContent = fmt(revenue) + ' ₽';
+    const prEl = document.getElementById(`prof-${p.id}`);
+    prEl.innerHTML = `<span>Прибыль</span><span class="${profit >= 0 ? 'positive' : 'negative'}">${fmt(profit)} ₽</span>`;
+  });
+
+  const totalTax = totalRevenue * 0.1;
+  const totalExpenses = totalCost + totalTax;
+  const netProfit = totalRevenue - totalExpenses;
+
+  document.getElementById('totalRevenue').textContent = fmt(totalRevenue) + ' ₽';
+  document.getElementById('totalCost').textContent = fmt(totalCost) + ' ₽';
+  document.getElementById('totalProfit').textContent = fmt(totalRevenue - totalCost) + ' ₽';
+  document.getElementById('totalProfit').dataset.prev = totalRevenue - totalCost;
+
+  document.getElementById('finalRevenue').textContent = fmt(totalRevenue) + ' ₽';
+  document.getElementById('finalCost').textContent = fmt(totalCost) + ' ₽';
+  document.getElementById('finalTax').textContent = fmt(totalTax) + ' ₽';
+  document.getElementById('finalExpenses').textContent = fmt(totalExpenses) + ' ₽';
+
+  const fp = document.getElementById('finalProfit');
+  fp.textContent = fmt(netProfit) + ' ₽';
+  fp.classList.toggle('negative', netProfit < 0);
+
+  // Confetti on positive profit change
+  if (netProfit > 0 && netProfit !== prevProfit) {
+    fp.classList.add('pulse');
+    setTimeout(() => fp.classList.remove('pulse'), 600);
+    if (netProfit > prevProfit) {
+      const rect = document.getElementById('finalProfit').getBoundingClientRect();
+      burstConfetti(rect.left + rect.width/2, rect.top);
+    }
+  }
+}
+
+// ===== TIER TABLE =====
+function renderTierTable() {
+  const body = document.getElementById('tierTableBody');
+  body.innerHTML = '';
+  products.forEach(p => {
+    const row = document.createElement('tr');
+    let cells = `<td style="padding:8px 10px;border-bottom:1px solid rgba(92,255,74,.03);font-weight:600;white-space:nowrap">${p.icon} ${p.name}</td>`;
+    const base = p.tiers[0].price;
+    p.tiers.forEach(t => {
+      const disc = Math.round((1 - t.price / base) * 100);
+      const discStr = disc > 0 ? `<span style="color:var(--neon)">−${disc}%</span>` : '<span style="color:var(--text4)">—</span>';
+      cells += `<td style="padding:8px 6px;border-bottom:1px solid rgba(92,255,74,.03);text-align:center;font-size:11px">
+        <div style="font-weight:600;color:var(--text)">${t.qty.toLocaleString()}</div>
+        <div style="color:var(--neon);font-weight:700">${t.price}₽</div>
+        <div style="font-size:10px">${discStr}</div>
+      </td>`;
+    });
+    row.innerHTML = cells;
+    body.appendChild(row);
+  });
+}
+
+document.getElementById('toggleTiers').addEventListener('click', () => {
+  const block = document.getElementById('tierBlock');
+  const btn = document.getElementById('toggleTiers');
+  const isHidden = block.style.display === 'none';
+  block.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '✕ Скрыть тарифы' : '🏷️ Тарифы и скидки';
+});
+
+// ===== PADEL THEME =====
+function addFloatingShapes() {
+  // Court grid
+  const court = document.createElement('div');
+  court.style.cssText = 'position:fixed;pointer-events:none;z-index:0;inset:0;opacity:.04;background-image:linear-gradient(rgba(92,255,74,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(92,255,74,.4) 1px,transparent 1px);background-size:60px 60px';
+  document.body.appendChild(court);
+
+  // Center line
+  const net = document.createElement('div');
+  net.style.cssText = 'position:fixed;pointer-events:none;z-index:0;top:0;left:50%;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(92,255,74,.06),transparent);transform:translateX(-50%)';
+  document.body.appendChild(net);
+
+  // Padel balls
+  for (let i = 0; i < 8; i++) {
+    const s = 14 + Math.random() * 10;
+    const b = document.createElement('div');
+    b.style.cssText = `position:fixed;pointer-events:none;z-index:0;width:${s}px;height:${s}px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#E8FF66,#A0D800);box-shadow:inset -2px -2px 4px rgba(0,0,0,.2),0 0 10px rgba(92,255,74,.12);left:${5+Math.random()*90}%;top:${10+Math.random()*80}%;opacity:.1;animation:pb${i} ${10+Math.random()*10}s ease-in-out infinite;animation-delay:${Math.random()*-8}s`;
+    // Seam
+    if (i % 2 === 0) {
+      b.style.boxShadow += ',inset 0 0 0 1px rgba(255,255,255,.08)';
+      b.style.background = `radial-gradient(circle at 35% 30%,#E8FF66,#A0D800),repeating-linear-gradient(90deg,transparent 0,transparent ${s*.22}px,rgba(255,255,255,.06) ${s*.22}px,rgba(255,255,255,.06) ${s*.22+1}px,transparent ${s*.22+1}px,transparent ${s*.44}px)`;
+    }
+    const st = document.createElement('style');
+    const dx = (Math.random()-.5)*80;
+    const dy = -(20+Math.random()*40);
+    const dx2 = (Math.random()-.5)*60;
+    st.textContent = `@keyframes pb${i}{0%{transform:translate(0,0) rotate(0deg) scale(1)}33%{transform:translate(${dx}px,${dy}px) rotate(${Math.random()*90-45}deg) scale(1.1)}66%{transform:translate(${dx2}px,${dy*1.3}px) rotate(${Math.random()*180-90}deg) scale(.95)}100%{transform:translate(0,0) rotate(0deg) scale(1)}}`;
+    document.head.appendChild(st);
+    document.body.appendChild(b);
+  }
+}
+addFloatingShapes();
+
+// ===== TAB SWITCHING =====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.view + 'View').classList.add('active');
+  });
+});
+
+// ===== MOSCOMSPORT/800 =====
+const MS_QTY = 800;
+const msProducts = products.filter(p => p.id === 'grabber' || p.id === 'racket-holder');
+const msFixedCosts = [
+  { name: 'Пластик 50кг', cost: 51000 },
+  { name: 'Типография', cost: 23000 },
+];
+const msFixedTotal = msFixedCosts.reduce((s, c) => s + c.cost, 0);
+
+function renderMoskomsport() {
+  const orderGrid = document.getElementById('msOrderGrid');
+  const materialsBlock = document.getElementById('msMaterialsBlock');
+  const totalsCard = document.getElementById('msTotalsCard');
+  let totalRevenue = 0, totalMatCost = 0;
+
+  orderGrid.innerHTML = '';
+  materialsBlock.innerHTML = '';
+
+  msProducts.forEach((p, idx) => {
+    const tier = getTier(p.tiers, MS_QTY);
+    const sellPrice = tier.price;
+    const revenue = MS_QTY * sellPrice;
+    const matCost = MS_QTY * matCostPerUnit(p);
+    totalRevenue += revenue;
+    totalMatCost += matCost;
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <span class="o-icon">${p.icon}</span>
+      <div class="o-name">${p.name}</div>
+      <div class="o-row"><span class="o-label">Количество</span><span class="o-val">${MS_QTY.toLocaleString()} шт</span></div>
+      <div class="o-row"><span class="o-label">Тариф</span><span class="o-val neon">${tier.qty.toLocaleString()}+ шт — ${sellPrice} ₽/шт</span></div>
+      <div class="o-row"><span class="o-label">Выручка</span><span class="o-val neon">${fmt(revenue)} ₽</span></div>
+      <div class="o-row"><span class="o-label">Материалы</span><span class="o-val" style="color:var(--red)">${fmt(matCost)} ₽</span></div>
+      <div class="o-row" style="border-bottom:none;padding-bottom:0"><span class="o-label">Прибыль</span><span class="o-val neon">${fmt(revenue - matCost)} ₽</span></div>
+      <div class="o-price">${fmt(sellPrice)} ₽/шт</div>
+    `;
+    orderGrid.appendChild(card);
+
+    const block = document.createElement('div');
+    block.className = 'm-block';
+    const hasMats = p.materials && p.materials.length > 0;
+    block.innerHTML = `
+      <div class="m-block-header"><span>${p.icon}</span> ${p.name} <span class="qty">× ${MS_QTY.toLocaleString()} шт</span></div>
+      ${hasMats ? `<div class="materials-grid">${p.materials.map(m => {
+        const totalPer = m.per * MS_QTY;
+        const totalCost = m.per * m.price * MS_QTY;
+        const perStr = m.unit === 'м' ? (totalPer >= 1 ? `${totalPer.toFixed(2)} м` : `${(totalPer*100).toFixed(0)} см`) : `${Math.round(totalPer)} ${m.unit}`;
+        return `<div class="mat-item">
+          <div class="m-name">${m.name} <a href="${m.link}" target="_blank">↗</a></div>
+          <div class="m-per">На ${MS_QTY.toLocaleString()} шт: ${perStr} × ${m.source || `${m.price.toFixed(2)} ₽/${m.unit}`}</div>
+          <div class="m-total">${fmt(totalCost)} ₽</div>
+        </div>`;
+      }).join('')}</div>` : '<div class="no-mats">Нет дополнительных материалов</div>'}
+      <div class="m-block-summary">Материалов на единицу: <strong>${fmt(matCostPerUnit(p))} ₽</strong> &nbsp;·&nbsp; Всего: <strong class="total">${fmt(matCost)} ₽</strong></div>
+    `;
+    materialsBlock.appendChild(block);
+    if (idx < msProducts.length - 1) {
+      const div = document.createElement('div');
+      div.className = 'm-divider';
+      materialsBlock.appendChild(div);
+    }
+  });
+
+  // Fixed costs
+  const fixedDiv = document.createElement('div');
+  fixedDiv.className = 'm-divider';
+  materialsBlock.appendChild(fixedDiv);
+  const fixedBlock = document.createElement('div');
+  fixedBlock.className = 'm-block';
+  fixedBlock.innerHTML = `
+    <div class="m-block-header">📦 Дополнительные расходы</div>
+    <div class="materials-grid">${msFixedCosts.map(c => `
+      <div class="mat-item">
+        <div class="m-name">${c.name}</div>
+        <div class="m-total">${fmt(c.cost)} ₽</div>
+      </div>
+    `).join('')}</div>
+    <div class="m-block-summary">Итого доп. расходов: <strong class="total">${fmt(msFixedTotal)} ₽</strong></div>
+  `;
+  materialsBlock.appendChild(fixedBlock);
+
+  const totalFullCost = totalMatCost + msFixedTotal;
+  const tax = totalRevenue * 0.1;
+  const expenses = totalFullCost + tax;
+  const profit = totalRevenue - expenses;
+
+  totalsCard.innerHTML = `
+    <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Материалы (продукты)</span><span class="t-val red">${fmt(totalMatCost)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Пластик 50кг</span><span class="t-val red">${fmt(51000)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Типография</span><span class="t-val red">${fmt(23000)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
+    <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
+  `;
+}
+
+renderMoskomsport();
+
+// ===== MOSCOMSPORT 400/400 (завершённая поставка) =====
+const MS2_QTY = 400;
+const ms2Items = [
+  { name: 'Пластик 28кг', cost: 28000 },
+  { name: 'Велкро 40м', cost: 3000 },
+  { name: 'Двухсторонний скотч 72м', cost: 2320 },
+  { name: 'Клейкий стик 400шт', cost: 6680 },
+  { name: 'Пакеты 400шт', cost: 2904 },
+  { name: 'Печать (наклейки) 800шт', cost: 16770 },
+  { name: 'Салфетки 400шт', cost: 488 },
+  { name: 'Сборка', cost: 13000 },
+];
+const ms2TotalCosts = ms2Items.reduce((s, c) => s + c.cost, 0);
+
+function renderMs2() {
+  const orderGrid = document.getElementById('ms2OrderGrid');
+  const costsBlock = document.getElementById('ms2CostsBlock');
+  const totalsCard = document.getElementById('ms2TotalsCard');
+  let totalRevenue = 0;
+
+  orderGrid.innerHTML = '';
+
+  msProducts.forEach(p => {
+    const tier = getTier(p.tiers, MS2_QTY);
+    const sellPrice = tier.price;
+    const revenue = MS2_QTY * sellPrice;
+    totalRevenue += revenue;
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <span class="o-icon">${p.icon}</span>
+      <div class="o-name">${p.name}</div>
+      <div class="o-row"><span class="o-label">Количество</span><span class="o-val">${MS2_QTY.toLocaleString()} шт</span></div>
+      <div class="o-row"><span class="o-label">Тариф</span><span class="o-val neon">${tier.qty.toLocaleString()}+ шт — ${sellPrice} ₽/шт</span></div>
+      <div class="o-row"><span class="o-label">Выручка</span><span class="o-val neon">${fmt(revenue)} ₽</span></div>
+      <div class="o-price">${fmt(sellPrice)} ₽/шт</div>
+    `;
+    orderGrid.appendChild(card);
+  });
+
+  costsBlock.innerHTML = `
+    <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      ${ms2Items.map(c => `
+        <div class="mat-item">
+          <div class="m-name">${c.name}</div>
+          <div class="m-total">${fmt(c.cost)} ₽</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="m-block-summary" style="margin-top:12px;font-size:14px">
+      Итого затрат: <strong class="total" style="font-size:18px">${fmt(ms2TotalCosts)} ₽</strong>
+    </div>
+  `;
+
+  const tax = totalRevenue * 0.1;
+  const expenses = ms2TotalCosts + tax;
+  const profit = totalRevenue - expenses;
+
+  totalsCard.innerHTML = `
+    <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Фактические затраты</span><span class="t-val red">${fmt(ms2TotalCosts)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
+    <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
+  `;
+}
+renderMs2();
+
+// ===== FONBET 30/320/30 (завершённая поставка) =====
+const fbItems = [
+  { icon: '🍓', name: 'Грабер', qty: 30, productId: 'grabber' },
+  { icon: '🎾', name: 'Держатель ракетки', qty: 320, productId: 'racket-holder' },
+  { icon: '📱', name: 'Держатель для телефона', qty: 30, productId: 'phone-holder' },
+];
+const fbCosts = [
+  { name: 'Пластик 28кг', cost: 28000 },
+  { name: 'Велкро 270см', cost: 214 },
+  { name: 'Двухсторонний скотч 270см', cost: 132 },
+  { name: 'Пакеты 30шт', cost: 231 },
+  { name: 'Наклейки (круг) 300шт', cost: 5100 },
+  { name: 'Печать (наклейки) 105шт', cost: 10860 },
+];
+const fbTotalCosts = fbCosts.reduce((s, c) => s + c.cost, 0);
+
+function getTierSafe(tiers, qty) {
+  for (const t of tiers) { if (qty >= t.qty) return t }
+  return tiers[0];
+}
+
+function renderFonbet() {
+  const orderGrid = document.getElementById('fbOrderGrid');
+  const costsBlock = document.getElementById('fbCostsBlock');
+  const totalsCard = document.getElementById('fbTotalsCard');
+  let totalRevenue = 0;
+
+  orderGrid.innerHTML = '';
+
+  fbItems.forEach(item => {
+    const p = products.find(x => x.id === item.productId);
+    const tier = getTierSafe(p.tiers, item.qty);
+    const sellPrice = tier.price;
+    const revenue = item.qty * sellPrice;
+    totalRevenue += revenue;
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <span class="o-icon">${item.icon}</span>
+      <div class="o-name">${item.name}</div>
+      <div class="o-row"><span class="o-label">Количество</span><span class="o-val">${item.qty.toLocaleString()} шт</span></div>
+      <div class="o-row"><span class="o-label">Тариф</span><span class="o-val neon">${item.qty >= p.tiers[0].qty ? tier.qty.toLocaleString()+'+ шт' : 'до '+p.tiers[0].qty.toLocaleString()+ ' шт'} — ${sellPrice} ₽/шт</span></div>
+      <div class="o-row"><span class="o-label">Выручка</span><span class="o-val neon">${fmt(revenue)} ₽</span></div>
+      <div class="o-price">${fmt(sellPrice)} ₽/шт</div>
+    `;
+    orderGrid.appendChild(card);
+  });
+
+  costsBlock.innerHTML = `
+    <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      ${fbCosts.map(c => `
+        <div class="mat-item">
+          <div class="m-name">${c.name}</div>
+          <div class="m-total">${fmt(c.cost)} ₽</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="m-block-summary" style="margin-top:12px;font-size:14px">
+      Итого затрат: <strong class="total" style="font-size:18px">${fmt(fbTotalCosts)} ₽</strong>
+    </div>
+  `;
+
+  const tax = totalRevenue * 0.1;
+  const expenses = fbTotalCosts + tax;
+  const profit = totalRevenue - expenses;
+
+  totalsCard.innerHTML = `
+    <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Фактические затраты</span><span class="t-val red">${fmt(fbTotalCosts)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
+    <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
+  `;
+}
+renderFonbet();
+
+// ===== TOTAL SUMMARY =====
+function calcSupply(name, icon, data) {
+  const { products: items, qty, costs } = data;
+  let revenue = 0;
+  items.forEach(item => {
+    const p = products.find(x => x.id === item.productId);
+    const tier = getTierSafe(p.tiers, item.qty);
+    revenue += item.qty * tier.price;
+  });
+  const totalCosts = costs.reduce((s, c) => s + c.cost, 0);
+  const tax = revenue * 0.1;
+  const profit = revenue - totalCosts - tax;
+  return { name, icon, revenue, costs: totalCosts, tax, profit };
+}
+
+function renderTotal() {
+  const container = document.getElementById('totalSummary');
+  const supplies = [
+    calcSupply('Москомспорт 800/800', '📦', {
+      products: msProducts.map(p => ({ productId: p.id, qty: 800 })),
+      costs: [
+        ...msProducts.flatMap(p => p.materials.map(m => ({ name: m.name, cost: m.per * m.price * 800 }))),
+        ...msFixedCosts,
+      ],
+    }),
+    calcSupply('Москомспорт 400/400', '📋', {
+      products: msProducts.map(p => ({ productId: p.id, qty: 400 })),
+      costs: ms2Items,
+    }),
+    calcSupply('Fonbet 30/320/30', '🎲', {
+      products: fbItems.map(i => ({ productId: i.productId, qty: i.qty })),
+      costs: fbCosts,
+    }),
+  ];
+
+  let grandRevenue = 0, grandCosts = 0, grandTax = 0, grandProfit = 0;
+
+  let html = supplies.map(s => {
+    grandRevenue += s.revenue;
+    grandCosts += s.costs;
+    grandTax += s.tax;
+    grandProfit += s.profit;
+    return `
+      <div style="background:rgba(92,255,74,.02);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px">${s.icon} ${s.name}</div>
+        <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(s.revenue)} ₽</span></div>
+        <div class="t-row"><span class="t-label">Себестоимость</span><span class="t-val red">${fmt(s.costs)} ₽</span></div>
+        <div class="t-row"><span class="t-label">Налог 10%</span><span class="t-val red">${fmt(s.tax)} ₽</span></div>
+        <div class="t-row" style="border-bottom:none"><span class="t-label">Прибыль</span><span class="t-val neon">${fmt(s.profit)} ₽</span></div>
+      </div>
+    `;
+  }).join('');
+
+  html += `
+    <div style="background:rgba(92,255,74,.06);border:1px solid var(--neon-dim);border-radius:var(--radius-sm);padding:20px;margin-top:16px">
+      <div style="font-size:16px;font-weight:800;margin-bottom:10px;color:var(--neon);text-shadow:0 0 10px var(--neon-glow)">⚡ Итого по всем поставкам</div>
+      <div class="t-row"><span class="t-label">Общая выручка</span><span class="t-val" style="font-size:18px">${fmt(grandRevenue)} ₽</span></div>
+      <div class="t-row"><span class="t-label">Общая себестоимость</span><span class="t-val red" style="font-size:18px">${fmt(grandCosts)} ₽</span></div>
+      <div class="t-row"><span class="t-label">Общий налог</span><span class="t-val red" style="font-size:18px">${fmt(grandTax)} ₽</span></div>
+      <div class="t-row total"><span class="t-label">Общая чистая прибыль</span><span class="t-val neon" style="font-size:28px">${fmt(grandProfit)} ₽</span></div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+renderTotal();
+
+// ===== MATERIALS VIEW =====
+function renderMaterialsView() {
+  const container = document.getElementById('materialsList');
+  container.innerHTML = '';
+  products.forEach(p => {
+    if (!p.materials || !p.materials.length) return;
+    const block = document.createElement('div');
+    block.className = 'm-block';
+    block.innerHTML = `
+      <div class="m-block-header"><span>${p.icon}</span> ${p.name}</div>
+      <div class="materials-grid">${p.materials.map(m => `
+        <div class="mat-item">
+          <div class="m-name">${m.name} <a href="${m.link}" target="_blank">↗</a></div>
+          <div class="m-per">${m.per} ${m.unit} на 1 шт</div>
+          <div class="m-price">${m.source || `${m.price.toFixed(2)} ₽/${m.unit}`}</div>
+        </div>
+      `).join('')}</div>
+    `;
+    container.appendChild(block);
+  });
+  const printBlock = document.createElement('div');
+  printBlock.className = 'm-block';
+  printBlock.style.marginTop = '16px';
+  printBlock.innerHTML = `
+    <div class="m-block-header">🖨️ Типография</div>
+    <div class="materials-grid" style="grid-template-columns:1fr">
+      <div class="mat-item">
+        <div class="m-name">Telegram</div>
+        <div class="m-price"><a href="https://t.me/print600" target="_blank" style="color:var(--neon);text-decoration:none">@print600 ↗</a></div>
+      </div>
+      <div class="mat-item">
+        <div class="m-name">Телефон</div>
+        <div class="m-price" style="color:var(--text2)"><a href="tel:+79856656045" style="color:var(--neon);text-decoration:none">+7 (985) 665-60-45 ↗</a></div>
+      </div>
+    </div>
+  `;
+  container.appendChild(printBlock);
+}
+renderMaterialsView();
+
+// ===== INIT =====
+renderTierTable();
+selectProduct('grabber');
+calcProfit();
+</script>
+</body>
+</html>
