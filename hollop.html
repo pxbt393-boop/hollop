@@ -209,16 +209,89 @@ body{
   </section>
 
   <div class="tab-nav">
-    <button class="tab-btn active" data-view="calculator">📊 Калькулятор</button>
-    <button class="tab-btn" data-view="materials">🔗 Материалы</button>
-    <button class="tab-btn" data-view="fonbet2" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/30/30</button>
-    <button class="tab-btn" data-view="fonbet" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/320/30</button>
+    <button class="tab-btn active" data-view="moskomsport">📦 Москомспорт 800/800</button>
     <button class="tab-btn" data-view="ms2" style="text-decoration:line-through;opacity:.6">📋 Москомспорт 400/400</button>
-    <button class="tab-btn" data-view="moskomsport">📦 Москомспорт 800/800</button>
+    <button class="tab-btn" data-view="fonbet" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/320/30</button>
+    <button class="tab-btn" data-view="fonbet2" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/30/30</button>
     <button class="tab-btn" data-view="total">💰 Общая прибыль</button>
+    <button class="tab-btn" data-view="calculator">📊 Калькулятор</button>
+    <button class="tab-btn" data-view="materials">🔗 Материалы</button>
   </div>
 
-  <div id="calculatorView" class="view active">
+  <div id="moskomsportView" class="view active">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ДЕЙСТВУЮЩАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="msOrderGrid"></div>
+    </div>
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Себестоимость материалов</div>
+      <div id="msMaterialsBlock"></div>
+    </div>
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="msTotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="ms2View" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="ms2OrderGrid"></div>
+    </div>
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
+      <div id="ms2CostsBlock"></div>
+    </div>
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="ms2TotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="fonbetView" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="fbOrderGrid"></div>
+    </div>
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
+      <div id="fbCostsBlock"></div>
+    </div>
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="fbTotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="fonbet2View" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="fb2OrderGrid"></div>
+    </div>
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
+      <div id="fb2CostsBlock"></div>
+    </div>
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="fb2TotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="totalView" class="view">
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">💰</span> Сводка по всем поставкам</div>
+      <div id="totalSummary"></div>
+    </div>
+  </div>
+
+  <div id="calculatorView" class="view">
+
+
 
   <!-- PROFIT -->
   <div class="section-block">
@@ -311,83 +384,6 @@ body{
     <div class="section-block" id="materialsViewContent">
       <div class="section-title"><span class="num">📋</span> Все материалы и ссылки на поставщиков</div>
       <div id="materialsList"></div>
-    </div>
-  </div>
-
-  <div id="moskomsportView" class="view">
-    <div class="section-block">
-      <div class="section-title"><span class="num">1</span> Состав поставки</div>
-      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ДЕЙСТВУЮЩАЯ ПОСТАВКА</div>
-      <div class="order-grid" id="msOrderGrid"></div>
-    </div>
-
-    <div class="section-block">
-      <div class="section-title"><span class="num">2</span> Себестоимость материалов</div>
-      <div id="msMaterialsBlock"></div>
-    </div>
-
-    <div class="section-block" style="border-color:var(--neon-dim)">
-      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
-      <div class="totals-card" id="msTotalsCard"></div>
-    </div>
-  </div>
-
-  <div id="ms2View" class="view">
-    <div class="section-block">
-      <div class="section-title"><span class="num">1</span> Состав поставки</div>
-      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
-      <div class="order-grid" id="ms2OrderGrid"></div>
-    </div>
-
-    <div class="section-block">
-      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
-      <div id="ms2CostsBlock"></div>
-    </div>
-
-    <div class="section-block" style="border-color:var(--neon-dim)">
-      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
-      <div class="totals-card" id="ms2TotalsCard"></div>
-    </div>
-  </div>
-
-  <div id="fonbet2View" class="view">
-    <div class="section-block">
-      <div class="section-title"><span class="num">1</span> Состав поставки</div>
-      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
-      <div class="order-grid" id="fb2OrderGrid"></div>
-    </div>
-    <div class="section-block">
-      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
-      <div id="fb2CostsBlock"></div>
-    </div>
-    <div class="section-block" style="border-color:var(--neon-dim)">
-      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
-      <div class="totals-card" id="fb2TotalsCard"></div>
-    </div>
-  </div>
-
-  <div id="fonbetView" class="view">
-    <div class="section-block">
-      <div class="section-title"><span class="num">1</span> Состав поставки</div>
-      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
-      <div class="order-grid" id="fbOrderGrid"></div>
-    </div>
-
-    <div class="section-block">
-      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
-      <div id="fbCostsBlock"></div>
-    </div>
-
-    <div class="section-block" style="border-color:var(--neon-dim)">
-      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
-      <div class="totals-card" id="fbTotalsCard"></div>
-    </div>
-  </div>
-
-  <div id="totalView" class="view">
-    <div class="section-block" style="border-color:var(--neon-dim)">
-      <div class="section-title"><span class="num">💰</span> Сводка по всем поставкам</div>
-      <div id="totalSummary"></div>
     </div>
   </div>
 
