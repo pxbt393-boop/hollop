@@ -210,6 +210,7 @@ body{
 
   <div class="tab-nav">
     <button class="tab-btn active" data-view="calculator">📊 Калькулятор</button>
+    <button class="tab-btn" data-view="fonbet2" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/30/30</button>
     <button class="tab-btn" data-view="fonbet" style="text-decoration:line-through;opacity:.6">🎲 Fonbet 30/320/30</button>
     <button class="tab-btn" data-view="ms2" style="text-decoration:line-through;opacity:.6">📋 Москомспорт 400/400</button>
     <button class="tab-btn" data-view="moskomsport">📦 Москомспорт 800/800</button>
@@ -339,6 +340,22 @@ body{
     <div class="section-block" style="border-color:var(--neon-dim)">
       <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
       <div class="totals-card" id="ms2TotalsCard"></div>
+    </div>
+  </div>
+
+  <div id="fonbet2View" class="view">
+    <div class="section-block">
+      <div class="section-title"><span class="num">1</span> Состав поставки</div>
+      <div class="hero-badge" style="margin-bottom:16px"><span class="badge-dot"></span> ЗАВЕРШЁННАЯ ПОСТАВКА</div>
+      <div class="order-grid" id="fb2OrderGrid"></div>
+    </div>
+    <div class="section-block">
+      <div class="section-title"><span class="num">2</span> Фактические расходы</div>
+      <div id="fb2CostsBlock"></div>
+    </div>
+    <div class="section-block" style="border-color:var(--neon-dim)">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="totals-card" id="fb2TotalsCard"></div>
     </div>
   </div>
 
@@ -958,6 +975,77 @@ function renderFonbet() {
 }
 renderFonbet();
 
+// ===== FONBET 30/30/30 (завершённая поставка) =====
+const fb2Items = [
+  { icon: '🍓', name: 'Грабер', qty: 30, productId: 'grabber' },
+  { icon: '🎾', name: 'Держатель ракетки', qty: 30, productId: 'racket-holder' },
+  { icon: '📱', name: 'Держатель для телефона', qty: 30, productId: 'phone-holder' },
+];
+const fb2Costs = [
+  { name: 'Пластик 13кг', cost: 13600 },
+  { name: 'Велкро 270см', cost: 214 },
+  { name: 'Двухсторонний скотч 270см', cost: 132 },
+  { name: 'Пакеты 30шт', cost: 231 },
+  { name: 'Печать (наклейки) 105шт', cost: 2300 },
+];
+const fb2TotalCosts = fb2Costs.reduce((s, c) => s + c.cost, 0);
+
+function renderFonbet2() {
+  const orderGrid = document.getElementById('fb2OrderGrid');
+  const costsBlock = document.getElementById('fb2CostsBlock');
+  const totalsCard = document.getElementById('fb2TotalsCard');
+  let totalRevenue = 0;
+
+  orderGrid.innerHTML = '';
+
+  fb2Items.forEach(item => {
+    const p = products.find(x => x.id === item.productId);
+    const tier = getTierSafe(p.tiers, item.qty);
+    const sellPrice = tier.price;
+    const revenue = item.qty * sellPrice;
+    totalRevenue += revenue;
+
+    const card = document.createElement('div');
+    card.className = 'order-card';
+    card.innerHTML = `
+      <span class="o-icon">${item.icon}</span>
+      <div class="o-name">${item.name}</div>
+      <div class="o-row"><span class="o-label">Количество</span><span class="o-val">${item.qty.toLocaleString()} шт</span></div>
+      <div class="o-row"><span class="o-label">Тариф</span><span class="o-val neon">${item.qty >= p.tiers[0].qty ? tier.qty.toLocaleString()+'+ шт' : 'до '+p.tiers[0].qty.toLocaleString()+ ' шт'} — ${sellPrice} ₽/шт</span></div>
+      <div class="o-row"><span class="o-label">Выручка</span><span class="o-val neon">${fmt(revenue)} ₽</span></div>
+      <div class="o-price">${fmt(sellPrice)} ₽/шт</div>
+    `;
+    orderGrid.appendChild(card);
+  });
+
+  costsBlock.innerHTML = `
+    <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      ${fb2Costs.map(c => `
+        <div class="mat-item">
+          <div class="m-name">${c.name}</div>
+          <div class="m-total">${fmt(c.cost)} ₽</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="m-block-summary" style="margin-top:12px;font-size:14px">
+      Итого затрат: <strong class="total" style="font-size:18px">${fmt(fb2TotalCosts)} ₽</strong>
+    </div>
+  `;
+
+  const tax = totalRevenue * 0.1;
+  const expenses = fb2TotalCosts + tax;
+  const profit = totalRevenue - expenses;
+
+  totalsCard.innerHTML = `
+    <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Фактические затраты</span><span class="t-val red">${fmt(fb2TotalCosts)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
+    <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
+  `;
+}
+renderFonbet2();
+
 // ===== TOTAL SUMMARY =====
 function calcSupply(name, icon, data) {
   const { products: items, qty, costs } = data;
@@ -990,6 +1078,10 @@ function renderTotal() {
     calcSupply('Fonbet 30/320/30', '🎲', {
       products: fbItems.map(i => ({ productId: i.productId, qty: i.qty })),
       costs: fbCosts,
+    }),
+    calcSupply('Fonbet 30/30/30', '🎲', {
+      products: fb2Items.map(i => ({ productId: i.productId, qty: i.qty })),
+      costs: fb2Costs,
     }),
   ];
 
