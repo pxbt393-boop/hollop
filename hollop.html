@@ -10,7 +10,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg1:#1B2A6B;--bg3:#3A3FA0;--bg5:#6440E8;
-  --neon:#5CFF4A;--neon-dim:rgba(92,255,74,.15);--neon-glow:rgba(92,255,74,.3);
+  --neon:#5CFF4A;--neon-dim:rgba(92,255,74,.15);
   --red:#FF4A6A;--red-dim:rgba(255,74,106,.15);
   --surface:rgba(27,42,107,.5);--text:#f0f5ff;--text2:#c8d0e8;--text3:#8890b8;--text4:#586090;
   --font:'Inter',system-ui,sans-serif;--radius:16px;--radius-sm:10px;--ease2:cubic-bezier(0.22,1,0.36,1);
@@ -20,15 +20,13 @@ body{
   background:linear-gradient(135deg,var(--bg1),var(--bg3),var(--bg5));color:var(--text);
 }
 #particles-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
-#cursor{position:fixed;width:16px;height:16px;border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:difference;transition:width .3s,height .3s,background .3s,transform .15s;transform:translate(-50%,-50%);background:var(--neon);display:none;box-shadow:0 0 20px var(--neon-glow),0 0 60px rgba(92,255,74,.2)}
-#cursor.hovering{width:48px;height:48px;background:var(--neon)}
-@media(hover:hover){#cursor{display:block}}
+@media(hover:hover){}
 .main{z-index:1;position:relative;flex:1}
 .container{max-width:1000px;margin:0 auto;padding:0 20px;width:100%}
 
 .header{padding:24px 0 8px;display:flex;align-items:center;justify-content:space-between;position:relative}
 .header::after{content:'';position:absolute;bottom:0;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,var(--neon-dim),transparent)}
-.logo-text{font-size:28px;font-weight:900;letter-spacing:-1px;color:var(--neon);text-shadow:0 0 20px rgba(92,255,74,.15);line-height:1;position:relative;display:inline-block}
+.logo-text{font-size:28px;font-weight:900;letter-spacing:-1px;color:var(--neon);line-height:1;position:relative;display:inline-block}
 .logo-text::after{content:'◆';position:absolute;top:-8px;right:-16px;font-size:8px;color:var(--neon);opacity:.4;animation:sparkle 2s ease-in-out infinite}
 @keyframes sparkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:.8;transform:scale(1.4)}}
 .logo-sub{font-size:11px;color:var(--text4);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
@@ -36,8 +34,7 @@ body{
 .hero{text-align:center;padding:28px 0 24px;animation:fadeDown .6s ease}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
 .hero h1{font-size:clamp(26px,4vw,42px);font-weight:900;line-height:1.1;margin-bottom:6px;letter-spacing:-1.5px}
-.hero h1 .accent{color:var(--neon);text-shadow:0 0 20px var(--neon-glow);animation:glowPulse 3s ease-in-out infinite}
-@keyframes glowPulse{0%,100%{text-shadow:0 0 20px var(--neon-glow)}50%{text-shadow:0 0 40px var(--neon-glow),0 0 80px rgba(92,255,74,.15)}}
+.hero h1 .accent{color:var(--neon)}
 .hero p{font-size:14px;color:var(--text2)}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:100px;font-size:11px;font-weight:600;background:var(--neon-dim);color:var(--neon);border:1px solid var(--neon-dim);margin-bottom:10px;animation:fadeDown .6s .2s both}
 .badge-dot{width:5px;height:5px;border-radius:50%;background:var(--neon);animation:dotPulse 1.2s ease infinite}
@@ -78,9 +75,9 @@ body{
 .totals-bar .tb-val{font-size:20px;font-weight:800;margin-top:2px;transition:all .3s}
 .tb-val.revenue{color:var(--text)}
 .tb-val.cost{color:var(--red)}
-.tb-val.profit{color:var(--neon);text-shadow:0 0 15px var(--neon-glow)}
+.tb-val.profit{color:var(--neon)}
 .tb-val.profit.positive{animation:profitGlow 1s ease}
-@keyframes profitGlow{0%{transform:scale(1)}50%{transform:scale(1.1);text-shadow:0 0 40px var(--neon-glow)}100%{transform:scale(1)}}
+@keyframes profitGlow{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
 
 /* SELECTOR */
 .selector-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
@@ -142,7 +139,7 @@ body{
 .order-card .o-label{color:var(--text4)}
 .order-card .o-val{font-weight:700;color:var(--text)}
 .order-card .o-val.neon{color:var(--neon)}
-.order-card .o-price{font-size:24px;font-weight:900;color:var(--neon);text-shadow:0 0 15px var(--neon-glow);margin-top:8px;text-align:right}
+.order-card .o-price{font-size:24px;font-weight:900;color:var(--neon);margin-top:8px;text-align:right}
 .totals-card{background:rgba(92,255,74,.04);border:1px solid rgba(92,255,74,.1);border-radius:var(--radius-sm);padding:20px;position:relative;overflow:hidden}
 .totals-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent);animation:barScan 3s ease-in-out infinite}
 .t-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px;border-bottom:1px solid rgba(92,255,74,.04)}
@@ -153,7 +150,7 @@ body{
 .t-val.neon{color:var(--neon)}
 .t-row.total{border-top:1px solid var(--neon-dim);margin-top:6px;padding-top:14px}
 .t-row.total .t-label{font-size:16px;font-weight:800;color:var(--text)}
-.t-row.total .t-val{font-size:24px;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon-glow)}
+.t-row.total .t-val{font-size:24px;font-weight:900;color:var(--neon)}
 .m-block{margin-bottom:20px}
 .m-block:last-child{margin-bottom:0}
 .m-block-header{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -168,8 +165,8 @@ body{
 /* FINAL PROFIT */
 #finalProfit{transition:all .3s}
 #finalProfit.pulse{animation:profitPulse .6s ease}
-@keyframes profitPulse{0%{transform:scale(1)}50%{transform:scale(1.08);text-shadow:0 0 40px var(--neon-glow),0 0 80px var(--neon-glow)}100%{transform:scale(1)}}
-#finalProfit.negative{color:var(--red)!important;text-shadow:none!important}
+@keyframes profitPulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+#finalProfit.negative{color:var(--red)!important}
 
 .footer{margin-top:auto;padding:20px 0;text-align:center;border-top:1px solid rgba(92,255,74,.06);font-size:12px;color:var(--text4);position:relative;z-index:2}
 
@@ -190,7 +187,6 @@ body{
 <body>
 
 <canvas id="particles-canvas"></canvas>
-<div id="cursor"></div>
 
 <div class="main">
 <div class="container">
@@ -371,8 +367,8 @@ body{
         <span style="font-size:18px;font-weight:700;color:var(--text2)" id="finalExpenses">0 ₽</span>
       </div>
       <div style="display:flex;justify-content:space-between;width:100%;border-top:1px solid var(--neon-dim);padding-top:10px">
-        <span style="font-size:20px;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon-glow)">Чистая прибыль</span>
-        <span style="font-size:28px;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon-glow)" id="finalProfit">0 ₽</span>
+        <span style="font-size:20px;font-weight:900;color:var(--neon)">Чистая прибыль</span>
+        <span style="font-size:28px;font-weight:900;color:var(--neon)" id="finalProfit">0 ₽</span>
       </div>
     </div>
   </div>
@@ -436,14 +432,6 @@ function animP(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{p
 animP();
 
 // ===== CURSOR =====
-const cursor = document.getElementById('cursor');
-if (window.matchMedia('(hover: hover)').matches) {
-  document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px' });
-  document.querySelectorAll('button, .profit-card, .sel-card, .qty-row input').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
-  });
-}
 
 // ===== CONFETTI =====
 function burstConfetti(x, y) {
@@ -1100,7 +1088,7 @@ function renderTotal() {
 
   html += `
     <div style="background:rgba(92,255,74,.06);border:1px solid var(--neon-dim);border-radius:var(--radius-sm);padding:20px;margin-top:16px">
-      <div style="font-size:16px;font-weight:800;margin-bottom:10px;color:var(--neon);text-shadow:0 0 10px var(--neon-glow)">⚡ Итого по всем поставкам</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:10px;color:var(--neon)">⚡ Итого по всем поставкам</div>
       <div class="t-row"><span class="t-label">Общая выручка</span><span class="t-val" style="font-size:18px">${fmt(grandRevenue)} ₽</span></div>
       <div class="t-row"><span class="t-label">Общая себестоимость</span><span class="t-val red" style="font-size:18px">${fmt(grandCosts)} ₽</span></div>
       <div class="t-row"><span class="t-label">Общий налог</span><span class="t-val red" style="font-size:18px">${fmt(grandTax)} ₽</span></div>
