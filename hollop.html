@@ -712,28 +712,32 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ===== MOSCOMSPORT/800 =====
 const MS_QTY = 800;
 const msProducts = products.filter(p => p.id === 'grabber' || p.id === 'racket-holder');
-const msFixedCosts = [
-  { name: 'Пластик 50кг', cost: 51000 },
-  { name: 'Типография', cost: 23000 },
+const msCosts = [
+  { name: 'Пластик (держатели)', cost: 51000 },
+  { name: 'Пластик (Грабберы)', cost: 9200 },
+  { name: 'Велкро 94м', cost: 3438 },
+  { name: '3М клейкая лента 160м', cost: 7392 },
+  { name: '3М (клейкий стик) 800шт', cost: 0 },
+  { name: 'Пакеты зип 800шт', cost: 5175 },
+  { name: 'Печать (наклейки) 2400шт', cost: 23000 },
+  { name: 'Салфетки 800шт', cost: 1254 },
 ];
-const msFixedTotal = msFixedCosts.reduce((s, c) => s + c.cost, 0);
+const msTotalCost = msCosts.reduce((s, c) => s + c.cost, 0);
 
 function renderMoskomsport() {
   const orderGrid = document.getElementById('msOrderGrid');
   const materialsBlock = document.getElementById('msMaterialsBlock');
   const totalsCard = document.getElementById('msTotalsCard');
-  let totalRevenue = 0, totalMatCost = 0;
+  let totalRevenue = 0;
 
   orderGrid.innerHTML = '';
   materialsBlock.innerHTML = '';
 
-  msProducts.forEach((p, idx) => {
+  msProducts.forEach(p => {
     const tier = getTier(p.tiers, MS_QTY);
     const sellPrice = tier.price;
     const revenue = MS_QTY * sellPrice;
-    const matCost = MS_QTY * matCostPerUnit(p);
     totalRevenue += revenue;
-    totalMatCost += matCost;
 
     const card = document.createElement('div');
     card.className = 'order-card';
@@ -743,65 +747,33 @@ function renderMoskomsport() {
       <div class="o-row"><span class="o-label">Количество</span><span class="o-val">${MS_QTY.toLocaleString()} шт</span></div>
       <div class="o-row"><span class="o-label">Тариф</span><span class="o-val neon">${tier.qty.toLocaleString()}+ шт — ${sellPrice} ₽/шт</span></div>
       <div class="o-row"><span class="o-label">Выручка</span><span class="o-val neon">${fmt(revenue)} ₽</span></div>
-      <div class="o-row"><span class="o-label">Материалы</span><span class="o-val" style="color:var(--red)">${fmt(matCost)} ₽</span></div>
-      <div class="o-row" style="border-bottom:none;padding-bottom:0"><span class="o-label">Прибыль</span><span class="o-val neon">${fmt(revenue - matCost)} ₽</span></div>
       <div class="o-price">${fmt(sellPrice)} ₽/шт</div>
     `;
     orderGrid.appendChild(card);
-
-    const block = document.createElement('div');
-    block.className = 'm-block';
-    const hasMats = p.materials && p.materials.length > 0;
-    block.innerHTML = `
-      <div class="m-block-header"><span>${p.icon}</span> ${p.name} <span class="qty">× ${MS_QTY.toLocaleString()} шт</span></div>
-      ${hasMats ? `<div class="materials-grid">${p.materials.map(m => {
-        const totalPer = m.per * MS_QTY;
-        const totalCost = m.per * m.price * MS_QTY;
-        const perStr = m.unit === 'м' ? (totalPer >= 1 ? `${totalPer.toFixed(2)} м` : `${(totalPer*100).toFixed(0)} см`) : `${Math.round(totalPer)} ${m.unit}`;
-        return `<div class="mat-item">
-          <div class="m-name">${m.name} <a href="${m.link}" target="_blank">↗</a></div>
-          <div class="m-per">На ${MS_QTY.toLocaleString()} шт: ${perStr} × ${m.source || `${m.price.toFixed(2)} ₽/${m.unit}`}</div>
-          <div class="m-total">${fmt(totalCost)} ₽</div>
-        </div>`;
-      }).join('')}</div>` : '<div class="no-mats">Нет дополнительных материалов</div>'}
-      <div class="m-block-summary">Материалов на единицу: <strong>${fmt(matCostPerUnit(p))} ₽</strong> &nbsp;·&nbsp; Всего: <strong class="total">${fmt(matCost)} ₽</strong></div>
-    `;
-    materialsBlock.appendChild(block);
-    if (idx < msProducts.length - 1) {
-      const div = document.createElement('div');
-      div.className = 'm-divider';
-      materialsBlock.appendChild(div);
-    }
   });
 
-  // Fixed costs
-  const fixedDiv = document.createElement('div');
-  fixedDiv.className = 'm-divider';
-  materialsBlock.appendChild(fixedDiv);
-  const fixedBlock = document.createElement('div');
-  fixedBlock.className = 'm-block';
-  fixedBlock.innerHTML = `
-    <div class="m-block-header">📦 Дополнительные расходы</div>
-    <div class="materials-grid">${msFixedCosts.map(c => `
-      <div class="mat-item">
-        <div class="m-name">${c.name}</div>
-        <div class="m-total">${fmt(c.cost)} ₽</div>
-      </div>
-    `).join('')}</div>
-    <div class="m-block-summary">Итого доп. расходов: <strong class="total">${fmt(msFixedTotal)} ₽</strong></div>
+  // Actual costs
+  materialsBlock.innerHTML = `
+    <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      ${msCosts.map(c => `
+        <div class="mat-item">
+          <div class="m-name">${c.name}</div>
+          <div class="m-total">${fmt(c.cost)} ₽</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="m-block-summary" style="margin-top:12px;font-size:14px">
+      Итого затрат: <strong class="total" style="font-size:18px">${fmt(msTotalCost)} ₽</strong>
+    </div>
   `;
-  materialsBlock.appendChild(fixedBlock);
 
-  const totalFullCost = totalMatCost + msFixedTotal;
   const tax = totalRevenue * 0.1;
-  const expenses = totalFullCost + tax;
+  const expenses = msTotalCost + tax;
   const profit = totalRevenue - expenses;
 
   totalsCard.innerHTML = `
     <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
-    <div class="t-row"><span class="t-label">Материалы (продукты)</span><span class="t-val red">${fmt(totalMatCost)} ₽</span></div>
-    <div class="t-row"><span class="t-label">Пластик 50кг</span><span class="t-val red">${fmt(51000)} ₽</span></div>
-    <div class="t-row"><span class="t-label">Типография</span><span class="t-val red">${fmt(23000)} ₽</span></div>
+    <div class="t-row"><span class="t-label">Фактические затраты</span><span class="t-val red">${fmt(msTotalCost)} ₽</span></div>
     <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
     <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
     <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
@@ -1047,10 +1019,7 @@ function renderTotal() {
   const supplies = [
     calcSupply('Москомспорт 800/800', '📦', {
       products: msProducts.map(p => ({ productId: p.id, qty: 800 })),
-      costs: [
-        ...msProducts.flatMap(p => p.materials.map(m => ({ name: m.name, cost: m.per * m.price * 800 }))),
-        ...msFixedCosts,
-      ],
+      costs: msCosts,
     }),
     calcSupply('Москомспорт 400/400', '📋', {
       products: msProducts.map(p => ({ productId: p.id, qty: 400 })),
