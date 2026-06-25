@@ -712,18 +712,21 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ===== MOSCOMSPORT/800 =====
 const MS_QTY = 800;
 const msProducts = products.filter(p => p.id === 'grabber' || p.id === 'racket-holder');
-const msCosts = [
+const msRacketCosts = [
+  { name: 'Клейкий стик (держатели)', cost: 8500 },
+  { name: 'Типография', cost: 11500 },
+];
+const msGrabberCosts = [
   { name: 'Пластик (держатели)', cost: 51000 },
   { name: 'Пластик (Грабберы)', cost: 9200 },
   { name: 'Велкро 94м', cost: 3438 },
   { name: '3М клейкая лента 160м', cost: 7392 },
-  { name: 'Клейкий стик (держатели)', cost: 8500 },
   { name: 'Пакеты зип 800шт', cost: 5175 },
-  { name: 'Печать (наклейки) 2400шт', cost: 23000 },
+  { name: 'Печать (наклейки)', cost: 11500 },
   { name: 'Салфетки 800шт', cost: 1254 },
   { name: 'Сборка', cost: 15000 },
 ];
-const msTotalCost = msCosts.reduce((s, c) => s + c.cost, 0);
+const msTotalCost = msRacketCosts.reduce((s, c) => s + c.cost, 0) + msGrabberCosts.reduce((s, c) => s + c.cost, 0);
 
 function renderMoskomsport() {
   const orderGrid = document.getElementById('msOrderGrid');
@@ -755,16 +758,37 @@ function renderMoskomsport() {
 
   // Actual costs
   materialsBlock.innerHTML = `
-    <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
-      ${msCosts.map(c => `
-        <div class="mat-item">
-          <div class="m-name">${c.name}</div>
-          <div class="m-total">${fmt(c.cost)} ₽</div>
-        </div>
-      `).join('')}
+    <div class="m-block" style="margin-bottom:16px">
+      <div class="m-block-header">🍓 Грабберы</div>
+      <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        ${msGrabberCosts.map(c => `
+          <div class="mat-item">
+            <div class="m-name">${c.name}</div>
+            <div class="m-total">${fmt(c.cost)} ₽</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="m-block-summary" style="margin-top:8px">
+        Итого: <strong class="total">${fmt(msGrabberCosts.reduce((s, c) => s + c.cost, 0))} ₽</strong>
+      </div>
     </div>
-    <div class="m-block-summary" style="margin-top:12px;font-size:14px">
-      Итого затрат: <strong class="total" style="font-size:18px">${fmt(msTotalCost)} ₽</strong>
+    <div class="m-block">
+      <div class="m-block-header">🎾 Держатель ракетки</div>
+      <div class="materials-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        ${msRacketCosts.map(c => `
+          <div class="mat-item">
+            <div class="m-name">${c.name}</div>
+            <div class="m-total">${fmt(c.cost)} ₽</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="m-block-summary" style="margin-top:8px">
+        Итого: <strong class="total">${fmt(msRacketCosts.reduce((s, c) => s + c.cost, 0))} ₽</strong>
+      </div>
+    </div>
+    <div class="m-divider"></div>
+    <div style="text-align:right;font-size:14px;margin-top:8px">
+      Всего затрат: <strong class="total" style="font-size:18px">${fmt(msTotalCost)} ₽</strong>
     </div>
   `;
 
@@ -1020,7 +1044,7 @@ function renderTotal() {
   const supplies = [
     calcSupply('Москомспорт 800/800', '📦', {
       products: msProducts.map(p => ({ productId: p.id, qty: 800 })),
-      costs: msCosts,
+      costs: [...msGrabberCosts, ...msRacketCosts],
     }),
     calcSupply('Москомспорт 400/400', '📋', {
       products: msProducts.map(p => ({ productId: p.id, qty: 400 })),
