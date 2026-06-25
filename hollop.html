@@ -221,6 +221,7 @@ body{
       <div class="section-title"><span class="num">2</span> Себестоимость материалов</div>
       <div id="msMaterialsBlock"></div>
     </div>
+    <div id="msProfitBreakdown"></div>
     <div class="section-block" style="border-color:var(--neon-dim)">
       <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
       <div class="totals-card" id="msTotalsCard"></div>
@@ -731,6 +732,7 @@ const msTotalCost = msRacketCosts.reduce((s, c) => s + c.cost, 0) + msGrabberCos
 function renderMoskomsport() {
   const orderGrid = document.getElementById('msOrderGrid');
   const materialsBlock = document.getElementById('msMaterialsBlock');
+  const breakdownDiv = document.getElementById('msProfitBreakdown');
   const totalsCard = document.getElementById('msTotalsCard');
   let totalRevenue = 0;
 
@@ -792,16 +794,64 @@ function renderMoskomsport() {
     </div>
   `;
 
+  const grabberProduct = products.find(p => p.id === 'grabber');
+  const racketProduct = products.find(p => p.id === 'racket-holder');
+  const grabberTier = getTier(grabberProduct.tiers, MS_QTY);
+  const racketTier = getTier(racketProduct.tiers, MS_QTY);
+  const grabberRevenue = MS_QTY * grabberTier.price;
+  const racketRevenue = MS_QTY * racketTier.price;
+  const grabberCosts = msGrabberCosts.reduce((s, c) => s + c.cost, 0);
+  const racketCosts = msRacketCosts.reduce((s, c) => s + c.cost, 0);
+  const grabberTax = grabberRevenue * 0.1;
+  const racketTax = racketRevenue * 0.1;
+  const grabberExpenses = grabberCosts + grabberTax;
+  const racketExpenses = racketCosts + racketTax;
+  const grabberProfit = grabberRevenue - grabberExpenses;
+  const racketProfit = racketRevenue - racketExpenses;
+  const grabberPct = grabberRevenue ? (grabberProfit / grabberRevenue * 100).toFixed(1) : '0';
+  const racketPct = racketRevenue ? (racketProfit / racketRevenue * 100).toFixed(1) : '0';
+
   const tax = totalRevenue * 0.1;
   const expenses = msTotalCost + tax;
   const profit = totalRevenue - expenses;
 
+  const breakdownHtml = `
+    <div class="section-block" style="margin-top:16px">
+      <div class="section-title"><span class="num">📊</span> Прибыль по продуктам</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div style="background:rgba(92,255,74,.02);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:14px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px">🍓 Грабберы</div>
+          <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(grabberRevenue)} ₽</span></div>
+          <div class="t-row"><span class="t-label">Себестоимость</span><span class="t-val red">${fmt(grabberCosts)} ₽</span></div>
+          <div class="t-row"><span class="t-label">Налог 10%</span><span class="t-val red">${fmt(grabberTax)} ₽</span></div>
+          <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(grabberExpenses)} ₽</span></div>
+          <div class="t-row" style="border-bottom:none"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(grabberProfit)} ₽</span></div>
+          <div style="margin-top:8px;font-size:13px;color:var(--neon)">Рентабельность: <strong>${grabberPct}%</strong></div>
+        </div>
+        <div style="background:rgba(92,255,74,.02);border:1px solid rgba(92,255,74,.06);border-radius:var(--radius-sm);padding:14px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px">🎾 Держатель ракетки</div>
+          <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(racketRevenue)} ₽</span></div>
+          <div class="t-row"><span class="t-label">Себестоимость</span><span class="t-val red">${fmt(racketCosts)} ₽</span></div>
+          <div class="t-row"><span class="t-label">Налог 10%</span><span class="t-val red">${fmt(racketTax)} ₽</span></div>
+          <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(racketExpenses)} ₽</span></div>
+          <div class="t-row" style="border-bottom:none"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(racketProfit)} ₽</span></div>
+          <div style="margin-top:8px;font-size:13px;color:var(--neon)">Рентабельность: <strong>${racketPct}%</strong></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  breakdownDiv.innerHTML = breakdownHtml;
+
   totalsCard.innerHTML = `
-    <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
-    <div class="t-row"><span class="t-label">Фактические затраты</span><span class="t-val red">${fmt(msTotalCost)} ₽</span></div>
-    <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
-    <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
-    <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
+    <div class="section-block" style="border-color:var(--neon-dim);margin-top:12px">
+      <div class="section-title"><span class="num">3</span> Итоговая прибыль</div>
+      <div class="t-row"><span class="t-label">Выручка</span><span class="t-val">${fmt(totalRevenue)} ₽</span></div>
+      <div class="t-row"><span class="t-label">Фактические затраты</span><span class="t-val red">${fmt(msTotalCost)} ₽</span></div>
+      <div class="t-row"><span class="t-label">Налог 10% с выручки</span><span class="t-val red">${fmt(tax)} ₽</span></div>
+      <div class="t-row"><span class="t-label">Всего расходов</span><span class="t-val">${fmt(expenses)} ₽</span></div>
+      <div class="t-row total"><span class="t-label">Чистая прибыль</span><span class="t-val neon">${fmt(profit)} ₽</span></div>
+    </div>
   `;
 }
 
